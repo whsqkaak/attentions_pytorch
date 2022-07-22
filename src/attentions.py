@@ -38,15 +38,59 @@ class DotProductAttention(nn.Module):
             A tuple of attention value and attention weights about query and value.
 
         Shape:
-            query: :math:`(L_q, E)` where L_q is query length(target sequence length),
+            query: :math:`(N_t, E)` where N_t is query length(target sequence length),
                 E is embedding dimension.
-            value: :math:`(L_v, E)` where L_v is value length(source sequence length),
+            value: :math:`(N_s, E)` where N_s is value length(source sequence length),
                 E is embedding dimension.
             
             Returns:
-                attention value: :math:`(L_q, E)`
-                attention weights: :math: `(L_q, L_v)`
+                attention value: :math:`(N_t, E)`
+                attention weights: :math: `(N_t, N_s)`
         """
+        attn_score = torch.mm(query, value.transpose(0, 1))
+        attn_weights = F.softmax(attn_score, dim=-1)
+        attn_value = torch.mm(attn_weights, value)
+        return attn_value, attn_weights
+
+
+class GeneralAttention(nn.Module):
+    """
+    This class is implementation of General Attention mechanism
+    proposed in "Effective Approaches to Attention-based Neural Machine Translation"(Luong et al., 2015).
+
+    Very similar with DotProductAttention.
+    """
+
+    def __init__(self, embed_dim: int):
+        super().__init__()
+        self.query_proj = nn.Linear(embed_dim, embed_dim, bias=False)
+
+    def forward(
+        self,
+        query: Tensor,
+        value: Tensor
+    ) -> Tuple[Tensor, Tensor]:
+        """
+        Args:
+            query:
+                Query Embedding tensors.
+            value:
+                Value Embedding tensors.
+
+        Returns:
+            A tuple of attention value and attention weights about query and value.
+
+        Shape:
+            query: :math:`(N_t, E)` where N_t is the target sequence length,
+                and E is embedding dimension.
+            value: :math:`(N_s, E)` where N_s is the source sequence length,
+                and E is embedding dimension.
+
+            Returns:
+                attention value: :math:`(N_t, E)`
+                attention weights: :math:`(N_t, N_s)`
+        """
+        query = self.query_proj(query)
         attn_score = torch.mm(query, value.transpose(0, 1))
         attn_weights = F.softmax(attn_score, dim=-1)
         attn_value = torch.mm(attn_weights, value)
