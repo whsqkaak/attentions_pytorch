@@ -1,10 +1,10 @@
 # attentions_pytorch
 A repository for implementations of attention mechanism by PyTorch.
 
-# Introduction
+## Introduction
 This repository contains implementations of attention mechanism by PyTorch.
 
 
-# Author
+## Author
 - SeungHyun Lee [@whsqkaak](https://github.com/whsqkaak)
 - Contacts: whsqkaak@naver.com
